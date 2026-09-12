@@ -309,8 +309,10 @@ function Animation( elem, properties, options ) {
 
 			deferred.notifyWith( elem, [ animation, percent, remaining ] );
 
-			// If there's more to do, yield
-			if ( percent < 1 && length ) {
+			// If there's more to do, yield.
+			// Empty animations (no tweens) must still observe duration so
+			// intermediate show/hide steps do not collapse timing (gh-3498).
+			if ( percent < 1 ) {
 				return remaining;
 			}
 
