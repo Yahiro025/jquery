@@ -505,11 +505,24 @@ jQuery.fn.extend( {
 			doAnimation = function() {
 
 				// Operate on a copy of prop so per-property easing won't be lost
-				var anim = Animation( this, jQuery.extend( {}, prop ), optall );
+				var anim = Animation( this, jQuery.extend( {}, prop ), optall ),
+					index;
 
 				// Empty animations, or finishing resolves immediately
 				if ( empty || dataPriv.get( this, "finish" ) ) {
 					anim.stop( true );
+
+					// jQuery.Animation no longer self-completes when there
+					// are no tweens (gh-3498), so drop the leftover timer
+					// and idle the fx loop when this was a public no-op.
+					for ( index = jQuery.timers.length; index--; ) {
+						if ( jQuery.timers[ index ].anim === anim ) {
+							jQuery.timers.splice( index, 1 );
+						}
+					}
+					if ( !jQuery.timers.length ) {
+						jQuery.fx.stop();
+					}
 				}
 			};
 
